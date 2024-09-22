@@ -60,8 +60,11 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     await update.message.reply_document(document=output, filename='processed_image.png')
 
 # Hàm xử lý lệnh hello
+# async def hello(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+#     await update.message.reply_text(f'Hello {update.effective_user.first_name}! Hãy gửi cho tôi một bức ảnh hoặc một tệp ảnh để tôi chèn logo vào.')
 async def hello(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text(f'Hello {update.effective_user.first_name}! Hãy gửi cho tôi một bức ảnh hoặc một tệp ảnh để tôi chèn logo vào.')
+    print("Received /hello command")
+    await update.message.reply_text(f'Hello {update.effective_user.first_name}!')
 
 # Thiết lập webhook
 async def setup_webhook(bot: Bot):
