@@ -11,7 +11,7 @@ API_TOKEN = os.getenv('API_TOKEN')
 WEBHOOK_URL = os.getenv('WEBHOOK_URL')  # URL webhook của bạn
 LOGO_PATH = 'logo.png'
 
-app_flask = Flask(__name__)  # Flask app để xử lý webhook
+app_flask = Flask(__name__)
 
 # Hàm chèn logo vào ảnh
 def add_logo(image: Image, logo: Image) -> Image:
@@ -63,6 +63,10 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 async def hello(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.reply_text(f'Hello {update.effective_user.first_name}! Hãy gửi cho tôi một bức ảnh hoặc một tệp ảnh để tôi chèn logo vào.')
 
+# Thiết lập webhook
+async def setup_webhook(bot: Bot):
+    await bot.set_webhook(url=f'{WEBHOOK_URL}/{API_TOKEN}')
+
 # Khởi tạo và chạy bot
 application = ApplicationBuilder().token(API_TOKEN).build()
 
@@ -70,7 +74,6 @@ application.add_handler(CommandHandler("hello", hello))
 application.add_handler(MessageHandler(filters.PHOTO, handle_photo))
 application.add_handler(MessageHandler(filters.Document.IMAGE, handle_document))
 
-# Thiết lập webhook
 @app_flask.route(f'/{API_TOKEN}', methods=['POST'])
 def webhook():
     update = Update.de_json(request.get_json(), application.bot)
@@ -78,9 +81,11 @@ def webhook():
     return "OK", 200
 
 if __name__ == '__main__':
-    # Thiết lập webhook cho bot
     bot = Bot(token=API_TOKEN)
-    bot.set_webhook(url=f'{WEBHOOK_URL}/{API_TOKEN}')
     
-    # Chạy Flask server để nhận webhook
+    # Chạy setup_webhook trong một vòng lặp sự kiện
+    import asyncio
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(setup_webhook(bot))
+    
     app_flask.run(host='0.0.0.0', port=int(os.getenv('PORT', 5000)))
